@@ -40,7 +40,7 @@ if (isset($_POST['search'])) {
     // if only one row was there in database table = OR student_name (CONCAT(first_name, ' ', last_name )) LIKE '%$searchTerm%'
     $result = mysqli_query($conn, $searchQuery);
     if (mysqli_num_rows($result) > 0) {
-        $searcheddata = mysqli_fetch_assoc($result); // this is the string to define variable
+        $searcheddata = mysqli_fetch_assoc($result); 
     }
 }
 ?>
