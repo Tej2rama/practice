@@ -142,31 +142,7 @@
     </style>
 </head>
 <body>
-<?php if (isset($_SESSION['active_financial_year_label'])): ?>
-    <div id="fy-notice">
-        Current Financial Year: <?= htmlspecialchars($_SESSION['active_financial_year_label']) ?>
-    </div>
-<?php else: ?>
-    <div id="fy-notice" style="background-color:#f2dede; color:#a94442; border-color:#ebccd1;">
-        No financial year selected.
-    </div>
-<?php endif; ?>
-
-<script>
-    setTimeout(() => {
-        const notice = document.getElementById('fy-notice');
-        if (notice) {
-            notice.style.opacity = '0';
-            setTimeout(() => notice.remove(), 5000); // Optional: remove after fade
-        }
-    }, 5000); // 5 seconds
-</script>
-
-<!--heading bar-->
-
- 
-    <!--heading bar-->
-    <div class="button-container">
+      <div class="button-container">
     <a href="ledger.php" class="image-button">
         <img src="https://i.postimg.cc/vZX9HkR6/student.jpg" alt="Students">
         <span>Students</span>
@@ -203,8 +179,7 @@
         
     </div>
 
-<!--Side Bar Starts-->
-<div class="sidebar">
+ <div class="sidebar">
     <a href="https://www.facebook.com" class="facebook" target="_blank">
         <i class="fab fa-facebook-f"></i>
     </a>
@@ -221,7 +196,6 @@
         <i class="fab fa-tiktok"></i>
     </a>
 </div>
-<!--Side Bar Ends-->
- 
+  
 </body>
 </html>
