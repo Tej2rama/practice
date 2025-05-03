@@ -1,27 +1,4 @@
-<?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-require 'db_connect.php';
-
-if (!isset($_SESSION['active_financial_year_id'])) {
-    // Show financialyear.php content below (inside body)
-} else 
-    // Delay for 10 seconds then continue
-echo "<script>
-    setTimeout(() => {
-        window.location.href = 'index.php';  
-    }, 5000);
-</script>";
-
-
-include 'financialyear.php';
-include "navbar.php"; 
-include "bottom.php";  
-?>
-
-
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
  
 <body>
