@@ -64,7 +64,7 @@ if (isset($_POST['search'])) {
 <!-- datalist id "suggestion" should match the list = "suggestion" this will track id -->
     <!-- name = "search_term" because this is applied in search field -->
         <?php
-        $suggest = mysqli_query($conn, "SELECT student_id, first_name, last_name FROM studentsdata"); // this is string to define what it will do
+        $suggest = mysqli_query($conn, "SELECT student_id, first_name, last_name FROM studentsdata");  
         while ($row = mysqli_fetch_assoc($suggest)) {
             $fullName = trim($row['first_name'] . ' ' . $row['last_name']); // full name is in concat with string
             echo "<option value='{$row['student_id']} - {$fullName}'>"; // full name has been used as variable
