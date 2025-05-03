@@ -1,144 +1,250 @@
 <?php
-$servername = "localhost";
-$username = "root"; // Default XAMPP MySQL username
-$password = ""; // Default XAMPP MySQL password is empty
-$database = "practice";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $database);
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
- 
-// Admit logic 
-$successMessage = '';
+require 'db_connect.php';
 
-if (isset($_GET['admit_student_id'])) {
-    $admitId = mysqli_real_escape_string($conn, $_GET['admit_student_id']);
-
-    // Fetch student's full name before updating
-    $fetchQuery = "SELECT first_name, last_name FROM studentsdata WHERE student_id = '$admitId'";
-    $result = mysqli_query($conn, $fetchQuery);
-
-    if ($row = mysqli_fetch_assoc($result)) {
-        $fullName = trim($row['first_name'] . ' ' . $row['last_name']);
-
-        // Update admission status
-        $updateQuery = "UPDATE studentsdata SET admission_status = 'Admitted' WHERE student_id = '$admitId'";
-        if (mysqli_query($conn, $updateQuery)) {
-            $successMessage = "$fullName Admitted Successfully";
-        }
-    }
-}
+if (!isset($_SESSION['active_financial_year_id'])) {
+    // Show financialyear.php content below (inside body)
+} else 
+    // Delay for 10 seconds then continue
+echo "<script>
+    setTimeout(() => {
+        window.location.href = 'index.php';  
+    }, 5000);
+</script>";
 
 
-// search student 
-$searcheddata = null; // SearchedStudent is the variable defined below by string I have changed it as searcheddata
-if (isset($_POST['search'])) {
-    $searchTerm = mysqli_real_escape_string($conn, $_POST['search_term']); // $_POST stands for post search to the search bar to requiest result
-    $searchParts = explode(' - ', $searchTerm);
-    $searchID = isset($searchParts[0]) ? trim($searchParts[0]) : '';
-// SQL Query 
-    $searchQuery = "
-        SELECT * FROM studentsdata
-        WHERE student_id = '$searchID'
-        OR CONCAT(first_name, ' ', last_name ) LIKE '%$searchTerm%' 
-        LIMIT 1
-    ";
-    // if only one row was there in database table = OR student_name (CONCAT(first_name, ' ', last_name )) LIKE '%$searchTerm%'
-    $result = mysqli_query($conn, $searchQuery);
-    if (mysqli_num_rows($result) > 0) {
-        $searcheddata = mysqli_fetch_assoc($result); 
-    }
-}
+include 'financialyear.php';
+include "navbar.php"; 
+include "bottom.php";  
 ?>
-<!--  HTML part for search label and to show the searched result  -->  
+
+
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Search Student</title>
-  
-</head>
+<html lang="en">
+ 
 <body>
 
-<h2>Search Student</h2>
 
-<!-- this whole part is for search lable and suggest student name and id starts -->
+  
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Everyone Accountant Pvt. Ltd.</title>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Font Awesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+         <style>
+       #fy-notice {
+    padding: 10px 20px;
+    background-color: #dff0d8;
+    color: #3c763d;
+    border: 1px solid #d6e9c6;
+    border-radius: 6px;
+    margin: 20px auto;
+    width: fit-content;
+    text-align: center;
+    transition: opacity 10s ease-out; /* <- fade over 10 seconds */
+}
 
-<form method="POST">
-<!-- Using method="POST" because the search form data is being handled with $_POST in PHP -->
-<input type="text" name="search_term" placeholder="Enter student ID or name" list="suggestion" required>
-    <datalist id="suggestion">
-<!-- datalist id "suggestion" should match the list = "suggestion" this will track id -->
-    <!-- name = "search_term" because this is applied in search field -->
-        <?php
-        $suggest = mysqli_query($conn, "SELECT student_id, first_name, last_name FROM studentsdata");  
-        while ($row = mysqli_fetch_assoc($suggest)) {
-            $fullName = trim($row['first_name'] . ' ' . $row['last_name']); // full name is in concat with string
-            echo "<option value='{$row['student_id']} - {$fullName}'>"; // full name has been used as variable
+    body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
         }
-        ?>
-    </datalist>
-    <button type="submit" name="search">Search</button>
-    <button onclick="window.location.href='studentform.php'">Add Student</button>
-</form>
 
-<!-- this whole part is for search lable and suggest student name and id ends -->
+    /* Sidebar styling Starts*/
+    .sidebar {
+            position: fixed;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
+        /* Icon Button Styling */
+        .sidebar a {
+            text-decoration: none;
+            font-size: 24px;
+            color: white;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
 
-<!-- after search what will be displayed ? -->
+        /* Social Media Colors */
+        .facebook { background: #1877F2; }
+        .youtube { background: red; }
+        .twitter { background: #1DA1F2; }
+        .whatsapp { background: #25D366; }
+        .tiktok { background: #000; }
 
-<?php if ($searcheddata): ?>
-     <h3>Student Information</h3>
-     <table border="1" cellpadding="2">
-        <!-- cellpadding can increase and decrease the cell width and height -->
-        <!-- this is html table where data will be displayed -->
-        <tr>
-            <th>ID</th>
-            <th>Student ID</th>
-            <th>Full Name</th>
-            <th>Gender</th>
-            <th>Date of Birth</th>
-            <th>Class</th>
-            <th>Address</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th>Guardian</th>
-            <th>Admission Status</th>
-            <th>Created At</th>
-        </tr>
-        <!-- this is php code to fetch data to the html table (above) -->
-        <tr>
-            <td><?= htmlspecialchars($searcheddata['id']); ?></td>
-            <td><?= htmlspecialchars($searcheddata['student_id']); ?></td>
-            <td><?= htmlspecialchars($searcheddata['first_name'] . ' ' . $searcheddata['last_name']); ?></td>
-            <!-- concat first name and last to show to the html full name column and searched data is the string for variable here -->
-            <td><?= htmlspecialchars($searcheddata['gender']); ?></td>
-            <td><?= htmlspecialchars($searcheddata['date_of_birth']); ?></td>
-            <td><?= htmlspecialchars($searcheddata['class']); ?></td>
-            <td><?= htmlspecialchars($searcheddata['address']); ?></td>
-            <td><?= htmlspecialchars($searcheddata['phone']); ?></td>
-            <td><?= htmlspecialchars($searcheddata['email']); ?></td>
-            <td><?= htmlspecialchars($searcheddata['guardian_name']); ?></td>
-            <td>
-    <?php if ($searcheddata['admission_status'] === 'Admitted'): ?>
-        <span style="background-color: #d4edda; color: #155724; padding: 3px 8px; border-radius: 4px;">
-            <?= htmlspecialchars($searcheddata['admission_status']); ?>
-        </span>
-    <?php else: ?>
-        <?= htmlspecialchars($searcheddata['admission_status']); ?><br>
-        <a href="?admit_student_id=<?= urlencode($searcheddata['student_id']); ?>" onclick="return confirm('Admit this student?')">Admit Now</a>
-    <?php endif; ?>
-</td>
+        /* Hover Effects */
+        .sidebar a:hover {
+            transform: scale(1.2);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+        }
+/* Sidebar styling Ends*/
 
-            <td><?= htmlspecialchars($searcheddata['created_at']); ?></td>
-        </tr>
-    </table>
-                
-<?php endif; ?>
  
-<!-- after search what will be displayed ? endif logic for the what will be displayed after search -->
+        .bottom {
+            background-color: Green;
+            color: white;
+        }
+        .contact-info {
+            background-color: none;
+            color: whitesmoke;
+            padding: 2px;
+            font-size: 16px;
+        }
+         
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 2px;
+            margin-bottom: 10px;
+            border: solid blue;
+                    }
+        .image-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: green;
+            font-size: 18px;
+            margin: 10px;
+              
+        }
+        .image-button:hover {
+            background-color: green;
+            color: honeydew;
+            transform: scale(1.1);
+        }
+        .image-button img {
+            width: 250px;
+            height: 200px;
+            border: solid #007bff;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        .image-button img:hover {
+            transform: scale(1.1);
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .icon {
+            font-size: 20px;
+        }
 
+    </style>
+</head>
+<body>
+<?php if (isset($_SESSION['active_financial_year_label'])): ?>
+    <div id="fy-notice">
+        Current Financial Year: <?= htmlspecialchars($_SESSION['active_financial_year_label']) ?>
+    </div>
+<?php else: ?>
+    <div id="fy-notice" style="background-color:#f2dede; color:#a94442; border-color:#ebccd1;">
+        No financial year selected.
+    </div>
+<?php endif; ?>
+
+<script>
+    setTimeout(() => {
+        const notice = document.getElementById('fy-notice');
+        if (notice) {
+            notice.style.opacity = '0';
+            setTimeout(() => notice.remove(), 5000); // Optional: remove after fade
+        }
+    }, 5000); // 5 seconds
+</script>
+
+<!--heading bar-->
+
+ 
+    <!--heading bar-->
+    <div class="button-container">
+    <a href="ledger.php" class="image-button">
+        <img src="https://i.postimg.cc/vZX9HkR6/student.jpg" alt="Students">
+        <span>Students</span>
+    </a>
+
+        <a href="teacher.html" class="image-button">
+            <img src="https://i.postimg.cc/wMVxQKQX/teacher.jpg" alt="Students">
+            <span>Teacher</span>
+        </a>
+        <a href="bank.html" class="image-button">
+            <img src="https://i.postimg.cc/sX55yX33/bank.jpg" alt="Students">
+            <span>Bank</span>
+        </a>
+        <a href="expense.html" class="image-button">
+            <img src="https://i.postimg.cc/TwvWk6gF/expense.jpg" alt="Students">
+            <span>Expense</span>
+        </a>
+        <a href="examination.html" class="image-button">
+            <img src="https://i.postimg.cc/PxKrms4m/examination.jpg" alt="Students">
+            <span>Examination</span>
+        </a>
+        <a href="report.html" class="image-button">
+            <img src="https://i.postimg.cc/MZFzxYrK/report.jpg" alt="Students">
+            <span>Report</span>
+        </a>
+        <a href="capital.html" class="image-button">
+            <img src="https://i.postimg.cc/GtsVbvHH/capital.jpg" alt="Students">
+            <span>Capital</span>
+        </a>
+        <a href="extra.html" class="image-button">
+            <img src="https://i.postimg.cc/66nNJNRz/inventory.jpg" alt="Students">
+            <span>Purchase/Sales/Extra</span>
+        </a>
+        
+    </div>
+
+<!--Side Bar Starts-->
+<div class="sidebar">
+    <a href="https://www.facebook.com" class="facebook" target="_blank">
+        <i class="fab fa-facebook-f"></i>
+    </a>
+    <a href="https://www.youtube.com" class="youtube" target="_blank">
+        <i class="fab fa-youtube"></i>
+    </a>
+    <a href="https://www.twitter.com" class="twitter" target="_blank">
+        <i class="fab fa-twitter"></i>
+    </a>
+    <a href="https://www.whatsapp.com" class="whatsapp" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+    <a href="https://www.tiktok.com" class="tiktok" target="_blank">
+        <i class="fab fa-tiktok"></i>
+    </a>
+</div>
+<!--Side Bar Ends-->
+ 
 </body>
 </html>
