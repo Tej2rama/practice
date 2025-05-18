@@ -1,4 +1,5 @@
 <?php
+// this is how to create connection 
 $servername = "localhost";
 $username = "root"; // Default XAMPP MySQL username
 $password = ""; // Default XAMPP MySQL password is empty
